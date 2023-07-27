@@ -4,7 +4,6 @@ import json
 import requests
 import time
 
-
 from werkzeug.wrappers import Response
 
 settings = frappe.get_doc(
@@ -46,7 +45,7 @@ def post(token):
         messages = data["entry"][0]["changes"][0]["value"].get("messages", [])
     except KeyError:
         messages = data["entry"]["changes"][0]["value"].get("messages", [])
-
+    """Gestione dei messaggi in entrata."""
     if messages:
         for message in messages:
             message_type = message['type']
@@ -64,7 +63,7 @@ def post(token):
                     'Authorization': 'Bearer ' + token 
 
                 }
-                response = requests.get(f'https://graph.facebook.com/v16.0/{media_id}/', headers=headers)
+                response = requests.get(f'https://graph.facebook.com/v17.0/{media_id}/', headers=headers)
                 
                 if response.status_code == 200:
                     media_data = response.json()
