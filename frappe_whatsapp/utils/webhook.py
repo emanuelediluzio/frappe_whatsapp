@@ -3,8 +3,91 @@ import frappe
 import json
 import requests
 import time
-
+from frappe.sessions import get_all_active_sessions
 from werkzeug.wrappers import Response
+from frappe.integrations.utils import make_post_request
+
+def send_message(mobile_no, message):
+        """Send WhatsApp message to the specified mobile number."""
+        data = {
+            "messaging_product": "whatsapp",
+            "to": mobile_no,
+            "type": "text"
+        }
+        
+        data["text"] = {
+                    "preview_url": True,
+                    "body": message
+                }
+
+        try:
+            notify(data)
+        except Exception as e:
+            frappe.throw(f"Failed to send message: {str(e)}")
+            
+"""Notify."""
+def notify(data):
+
+        settings = frappe.get_doc(
+            "WhatsApp Settings", "WhatsApp Settings",
+        )
+        token = settings.get_password("token")
+
+        headers = {
+            "authorization": f"Bearer {token}",
+            "content-type": "application/json"
+        }
+        try:
+            make_post_request(
+                f"{settings.url}/{settings.version}/{settings.phone_id}/messages",
+                headers=headers, data=json.dumps(data)
+            )
+
+        except Exception as e:
+            res = frappe.flags.integration_request.json()['error']
+            error_message = res.get('Error', res.get("message"))
+            frappe.get_doc({
+                "doctype": "WhatsApp Notification Log",
+                "template": "Text Message",
+                "meta_data": frappe.flags.integration_request.json()
+            }).insert(ignore_permissions=True)
+
+            frappe.throw(
+                msg=error_message,
+                title=res.get("error_user_title", "Error")
+            )
+
+"""Invia una notifica agli utenti online."""
+def send_notification_to_users(online_users, message):
+    
+    for user in online_users:
+        # Esempio: Invia una notifica utilizzando frappe.publish_realtime()
+        notification_message = f"Nuovo messaggio da {message['from']}: {message['text']['body']}"
+        frappe.publish_realtime(event="notification", message=notification_message, user=user)
+
+"""Interagisci con l'AI e ottieni la risposta."""
+def get_ai_response(message):
+    api_key = "LA_TUA_CHIAVE_API_OPENAI"  # Inserisci la tua chiave API di OpenAI
+    endpoint = "https://api.openai.com/v1/engines/davinci-codex/completions"
+    prompt = "Utente: {}\nAI:".format(message)
+
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + api_key,
+    }
+
+    data = {
+        "prompt": prompt,
+        "max_tokens": 150,
+    }
+
+    response = requests.post(endpoint, headers=headers, json=data)
+
+    if response.status_code == 200:
+        return response.json()["choices"][0]["text"]
+    else:
+        return "Si è verificato un errore nell'interazione con l'AI."
+
 
 settings = frappe.get_doc(
             "WhatsApp Settings", "WhatsApp Settings",
@@ -40,6 +123,9 @@ def post(token):
         "meta_data": json.dumps(data)
     }).insert(ignore_permissions=True)
 
+    # Ottengo la lista degli utenti online
+    online_users = [session.user for session in get_all_active_sessions()]
+
     messages = []
     try:
         messages = data["entry"][0]["changes"][0]["value"].get("messages", [])
@@ -56,6 +142,12 @@ def post(token):
                     "from": customer(message),
                     "message": message['text']['body']
                 }).insert(ignore_permissions=True)
+                 # Controlla se ci sono utenti online e fai qualcosa di appropriato
+                if online_users:
+                 send_notification_to_users(online_users, message)
+                else:
+                 send_message(("+" + str(message['from'])), get_ai_response(message['text']['body']))
+                
 
             elif message_type in ["image", "audio", "video", "document"]:
                 media_id = message[message_type]["id"]
@@ -77,8 +169,6 @@ def post(token):
                     if media_response.status_code == 200:
                         file_data = media_response.content
 
-
-
                         file_path = "/opt/bench/frappe-bench/sites/ced.confcommercioimola.cloud/public/files/"
                        
                         file_name = f"{frappe.generate_hash(length=10)}.{file_extension}"
@@ -88,7 +178,6 @@ def post(token):
                             file.write(file_data)
                        
                         time.sleep(1) 
-
                         
                         frappe.get_doc({
                             "doctype": "WhatsApp Message",
@@ -96,6 +185,11 @@ def post(token):
                             "from": customer(message),
                             "message": f"media:{file_name}"
                         }).insert(ignore_permissions=True)
+                        # Controlla se ci sono utenti online e fai qualcosa di appropriato
+                        if online_users:
+                         send_notification_to_users(online_users, message)
+                        else:
+                         send_message(("+" + str(message['from'])), get_ai_response(message['text']['body']))
     else:
         changes = None
         try:
