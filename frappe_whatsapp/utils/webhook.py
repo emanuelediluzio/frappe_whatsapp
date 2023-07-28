@@ -60,8 +60,6 @@ def post(token):
                     "from": customer(message),
                     "message": message['text']['body']
                 }).insert(ignore_permissions=True)
-                if online_users:
-                 send_notification_to_users(online_users, message)
 
             elif message_type in ["image", "audio", "video", "document"]:
                 media_id = message[message_type]["id"]
