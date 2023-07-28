@@ -131,6 +131,14 @@ def update_template_status(data):
         data
     )
 
+"""Invia una notifica agli utenti online."""
+def send_notification_to_users(online_users, message):
+    
+    for user in online_users:
+        # Esempio: Invia una notifica utilizzando frappe.publish_realtime()
+        notification_message = f"Nuovo messaggio da {message['from']}: {message['text']['body']}"
+        frappe.publish_realtime(event="notification", message=notification_message, user=user)
+
 
 def update_message_status(data):
     """Update message status."""
