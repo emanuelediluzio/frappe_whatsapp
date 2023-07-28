@@ -3,92 +3,8 @@ import frappe
 import json
 import requests
 import time
-from frappe.sessions import get_all_active_sessions
+
 from werkzeug.wrappers import Response
-from frappe.integrations.utils import make_post_request
-
-##def send_message(mobile_no, message):
-##        """Send WhatsApp message to the specified mobile number."""
-##        data = {
-##            "messaging_product": "whatsapp",
-##            "to": mobile_no,
-##            "type": "text"
-##        }
-        
-##        data["text"] = {
-##                    "preview_url": True,
-##                    "body": message
-##                }
-
-##        try:
-##            notify(data)
-##        except Exception as e:
-##            frappe.throw(f"Failed to send message: {str(e)}")
-            
-##"""Notify."""
-##def notify(data):
-
-##        settings = frappe.get_doc(
-##            "WhatsApp Settings", "WhatsApp Settings",
-##        )
-##        token = settings.get_password("token")
-
-##        headers = {
-##            "authorization": f"Bearer {token}",
-##            "content-type": "application/json"
-##        }
-##        try:
-##            make_post_request(
-##                f"{settings.url}/{settings.version}/{settings.phone_id}/messages",
-##                headers=headers, data=json.dumps(data)
-##            )
-
-##        except Exception as e:
-##            res = frappe.flags.integration_request.json()['error']
-##            error_message = res.get('Error', res.get("message"))
-##            frappe.get_doc({
-##                "doctype": "WhatsApp Notification Log",
-##                "template": "Text Message",
-##                "meta_data": frappe.flags.integration_request.json()
-##            }).insert(ignore_permissions=True)
-
-##            frappe.throw(
-##                msg=error_message,
-##                title=res.get("error_user_title", "Error")
-##            )
-
-"""Invia una notifica agli utenti online."""
-def send_notification_to_users(online_users, message):
-    
-    for user in online_users:
-        # Esempio: Invia una notifica utilizzando frappe.publish_realtime()
-        notification_message = f"Nuovo messaggio da {message['from']}: {message['text']['body']}"
-        frappe.publish_realtime(event="notification", message=notification_message, user=user)
-
-"""Interagisci con l'AI e ottieni la risposta."""
-def get_ai_response(message):
-    api_key = "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"
-    endpoint = "https://api.openai.com/v1/engines/davinci-codex/completions"
-    prompt = "Utente: {}\nAI:".format(message) + ",rispondi a tale domanda fingendo di essere un operatore della ASCOM Imola(puoi cercare informazioni su orari ecc sulla loro pagina), facendo pero attenzione a comunicare all'interlocutore di essere un intelligenza artificale e che appena un operatore sara' online ricevera' assistenza da quest'ultimo"
-
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + api_key,
-    }
-
-    data = {
-        "prompt": prompt,
-        "max_tokens": 150,
-    }
-
-    response = requests.post(endpoint, headers=headers, json=data)
-
-    if response.status_code == 200:
-        return response.json()["choices"][0]["text"]
-    else:
-        return "Si è verificato un errore nell'interazione con l'AI."
-
-
 
 settings = frappe.get_doc(
             "WhatsApp Settings", "WhatsApp Settings",
@@ -188,9 +104,6 @@ def post(token):
             changes = data["entry"]["changes"][0]
         update_status(changes)
     return
-
-# Ottengo la lista degli utenti online
-    online_users = [session.user for session in get_all_active_sessions()]
 
 def customer(message):
     if (frappe.db.get_value("Customer", filters={"mobile_no": ("+" + str(message['from']))}, fieldname="customer_name")):
