@@ -7,55 +7,55 @@ from frappe.sessions import get_all_active_sessions
 from werkzeug.wrappers import Response
 from frappe.integrations.utils import make_post_request
 
-def send_message(mobile_no, message):
+##def send_message(mobile_no, message):
         """Send WhatsApp message to the specified mobile number."""
-        data = {
-            "messaging_product": "whatsapp",
-            "to": mobile_no,
-            "type": "text"
-        }
+##        data = {
+##            "messaging_product": "whatsapp",
+##            "to": mobile_no,
+##            "type": "text"
+##        }
         
-        data["text"] = {
-                    "preview_url": True,
-                    "body": message
-                }
+##        data["text"] = {
+##                    "preview_url": True,
+##                    "body": message
+##                }
 
-        try:
-            notify(data)
-        except Exception as e:
-            frappe.throw(f"Failed to send message: {str(e)}")
+##        try:
+##            notify(data)
+##        except Exception as e:
+##            frappe.throw(f"Failed to send message: {str(e)}")
             
 """Notify."""
-def notify(data):
+##def notify(data):
 
-        settings = frappe.get_doc(
-            "WhatsApp Settings", "WhatsApp Settings",
-        )
-        token = settings.get_password("token")
+##        settings = frappe.get_doc(
+##            "WhatsApp Settings", "WhatsApp Settings",
+##        )
+##        token = settings.get_password("token")
 
-        headers = {
-            "authorization": f"Bearer {token}",
-            "content-type": "application/json"
-        }
-        try:
-            make_post_request(
-                f"{settings.url}/{settings.version}/{settings.phone_id}/messages",
-                headers=headers, data=json.dumps(data)
-            )
+##        headers = {
+##            "authorization": f"Bearer {token}",
+##            "content-type": "application/json"
+##        }
+##        try:
+##            make_post_request(
+##                f"{settings.url}/{settings.version}/{settings.phone_id}/messages",
+##                headers=headers, data=json.dumps(data)
+##            )
 
-        except Exception as e:
-            res = frappe.flags.integration_request.json()['error']
-            error_message = res.get('Error', res.get("message"))
-            frappe.get_doc({
-                "doctype": "WhatsApp Notification Log",
-                "template": "Text Message",
-                "meta_data": frappe.flags.integration_request.json()
-            }).insert(ignore_permissions=True)
+##        except Exception as e:
+##            res = frappe.flags.integration_request.json()['error']
+##            error_message = res.get('Error', res.get("message"))
+##            frappe.get_doc({
+##                "doctype": "WhatsApp Notification Log",
+##                "template": "Text Message",
+##                "meta_data": frappe.flags.integration_request.json()
+##            }).insert(ignore_permissions=True)
 
-            frappe.throw(
-                msg=error_message,
-                title=res.get("error_user_title", "Error")
-            )
+##            frappe.throw(
+##                msg=error_message,
+##                title=res.get("error_user_title", "Error")
+##            )
 
 """Invia una notifica agli utenti online."""
 def send_notification_to_users(online_users, message):
@@ -146,8 +146,8 @@ def post(token):
                  # Controlla se ci sono utenti online e fai qualcosa di appropriato
                 if online_users:
                  send_notification_to_users(online_users, message)
-                else:
-                 send_message(("+" + str(message['from'])), get_ai_response(message['text']['body']))
+                ##else:
+                 ##send_message(("+" + str(message['from'])), get_ai_response(message['text']['body']))
                 
 
             elif message_type in ["image", "audio", "video", "document"]:
@@ -188,8 +188,8 @@ def post(token):
                         }).insert(ignore_permissions=True)
                         if online_users:
                          send_notification_to_users(online_users, message)
-                        else:
-                         send_message(("+" + str(message['from'])), get_ai_response("Ti allego questo file multimediale:" + "media:{file_name}"))
+                        ##else:
+                         ##send_message(("+" + str(message['from'])), get_ai_response("Ti allego questo file multimediale:" + "media:{file_name}"))
     else:
         changes = None
         try:
