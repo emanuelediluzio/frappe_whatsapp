@@ -57,6 +57,8 @@ def post(token):
                     "from": customer(message),
                     "message": message['text']['body']
                 }).insert(ignore_permissions=True)
+                if [session.user for session in frappe.sessions.get_all_active_sessions()]:
+                   send_notification_to_users(message)
 
             elif message_type in ["image", "audio", "video", "document"]:
                 media_id = message[message_type]["id"]
@@ -134,7 +136,6 @@ def update_template_status(data):
 
 """Invia una notifica agli utenti online."""
 def send_notification_to_users(message):
-    
     for user in [session.user for session in frappe.sessions.get_all_active_sessions()]:
         # Esempio: Invia una notifica utilizzando frappe.publish_realtime()
         notification_message = f"Nuovo messaggio da {message['from']}: {message['text']['body']}"
