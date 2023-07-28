@@ -89,6 +89,7 @@ def get_ai_response(message):
         return "Si è verificato un errore nell'interazione con l'AI."
 
 
+
 settings = frappe.get_doc(
             "WhatsApp Settings", "WhatsApp Settings",
         )
@@ -123,16 +124,12 @@ def post(token):
         "meta_data": json.dumps(data)
     }).insert(ignore_permissions=True)
 
-    # Ottengo la lista degli utenti online
-    online_users = [session.user for session in get_all_active_sessions()]
-
     messages = []
     try:
         messages = data["entry"][0]["changes"][0]["value"].get("messages", [])
     except KeyError:
         messages = data["entry"]["changes"][0]["value"].get("messages", [])
-    
-    """Gestione dei messaggi in entrata."""
+
     if messages:
         for message in messages:
             message_type = message['type']
@@ -143,11 +140,10 @@ def post(token):
                     "from": customer(message),
                     "message": message['text']['body']
                 }).insert(ignore_permissions=True)
-                 ##if online_users:
+                ##if online_users:
                   ##send_notification_to_users(online_users, message)
                 ##else:
                  ##send_message(("+" + str(message['from'])), get_ai_response(message['text']['body']))
-                
 
             elif message_type in ["image", "audio", "video", "document"]:
                 media_id = message[message_type]["id"]
@@ -155,7 +151,7 @@ def post(token):
                     'Authorization': 'Bearer ' + token 
 
                 }
-                response = requests.get(f'https://graph.facebook.com/v17.0/{media_id}/', headers=headers)
+                response = requests.get(f'https://graph.facebook.com/v16.0/{media_id}/', headers=headers)
                 
                 if response.status_code == 200:
                     media_data = response.json()
@@ -169,6 +165,8 @@ def post(token):
                     if media_response.status_code == 200:
                         file_data = media_response.content
 
+
+
                         file_path = "/opt/bench/frappe-bench/sites/ced.confcommercioimola.cloud/public/files/"
                        
                         file_name = f"{frappe.generate_hash(length=10)}.{file_extension}"
@@ -178,6 +176,7 @@ def post(token):
                             file.write(file_data)
                        
                         time.sleep(1) 
+
                         
                         frappe.get_doc({
                             "doctype": "WhatsApp Message",
@@ -198,6 +197,8 @@ def post(token):
         update_status(changes)
     return
 
+# Ottengo la lista degli utenti online
+    online_users = [session.user for session in get_all_active_sessions()]
 
 def customer(message):
     if (frappe.db.get_value("Customer", filters={"mobile_no": ("+" + str(message['from']))}, fieldname="customer_name")):
@@ -240,4 +241,3 @@ def update_message_status(data):
     doc.save(ignore_permissions=True)
 
 import requests
-
