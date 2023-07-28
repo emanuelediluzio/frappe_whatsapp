@@ -6,8 +6,6 @@ import time
 
 from werkzeug.wrappers import Response
 
-# Ottengo la lista degli utenti online
-online_users = [session.user for session in get_all_active_sessions()]
 
 settings = frappe.get_doc(
             "WhatsApp Settings", "WhatsApp Settings",
