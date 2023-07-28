@@ -143,7 +143,6 @@ def post(token):
                     "from": customer(message),
                     "message": message['text']['body']
                 }).insert(ignore_permissions=True)
-                 # Controlla se ci sono utenti online e fai qualcosa di appropriato
                 if online_users:
                  send_notification_to_users(online_users, message)
                 ##else:
