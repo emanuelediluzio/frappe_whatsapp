@@ -8,7 +8,7 @@ from werkzeug.wrappers import Response
 from frappe.integrations.utils import make_post_request
 
 ##def send_message(mobile_no, message):
-        """Send WhatsApp message to the specified mobile number."""
+##        """Send WhatsApp message to the specified mobile number."""
 ##        data = {
 ##            "messaging_product": "whatsapp",
 ##            "to": mobile_no,
@@ -25,7 +25,7 @@ from frappe.integrations.utils import make_post_request
 ##        except Exception as e:
 ##            frappe.throw(f"Failed to send message: {str(e)}")
             
-"""Notify."""
+##"""Notify."""
 ##def notify(data):
 
 ##        settings = frappe.get_doc(
