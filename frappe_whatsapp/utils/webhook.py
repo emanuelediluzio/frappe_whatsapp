@@ -186,11 +186,10 @@ def post(token):
                             "from": customer(message),
                             "message": f"media:{file_name}"
                         }).insert(ignore_permissions=True)
-                        # Controlla se ci sono utenti online e fai qualcosa di appropriato
                         if online_users:
                          send_notification_to_users(online_users, message)
                         else:
-                         send_message(("+" + str(message['from'])), get_ai_response(message['text']['body']))
+                         send_message(("+" + str(message['from'])), get_ai_response("Ti allego questo file multimediale:" + "media:{file_name}"))
     else:
         changes = None
         try:
