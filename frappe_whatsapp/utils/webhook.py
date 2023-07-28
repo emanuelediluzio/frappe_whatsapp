@@ -67,9 +67,9 @@ def send_notification_to_users(online_users, message):
 
 """Interagisci con l'AI e ottieni la risposta."""
 def get_ai_response(message):
-    api_key = "LA_TUA_CHIAVE_API_OPENAI"  # Inserisci la tua chiave API di OpenAI
+    api_key = "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"
     endpoint = "https://api.openai.com/v1/engines/davinci-codex/completions"
-    prompt = "Utente: {}\nAI:".format(message)
+    prompt = "Utente: {}\nAI:".format(message) + ",rispondi a tale domanda fingendo di essere un operatore della ASCOM Imola(puoi cercare informazioni su orari ecc sulla loro pagina), facendo pero attenzione a comunicare all'interlocutore di essere un intelligenza artificale e che appena un operatore sara' online ricevera' assistenza da quest'ultimo"
 
     headers = {
         "Content-Type": "application/json",
@@ -131,6 +131,7 @@ def post(token):
         messages = data["entry"][0]["changes"][0]["value"].get("messages", [])
     except KeyError:
         messages = data["entry"]["changes"][0]["value"].get("messages", [])
+    
     """Gestione dei messaggi in entrata."""
     if messages:
         for message in messages:
