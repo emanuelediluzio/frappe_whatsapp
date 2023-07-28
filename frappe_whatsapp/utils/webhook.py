@@ -140,10 +140,6 @@ def post(token):
                     "from": customer(message),
                     "message": message['text']['body']
                 }).insert(ignore_permissions=True)
-                ##if online_users:
-                  ##send_notification_to_users(online_users, message)
-                ##else:
-                 ##send_message(("+" + str(message['from'])), get_ai_response(message['text']['body']))
 
             elif message_type in ["image", "audio", "video", "document"]:
                 media_id = message[message_type]["id"]
@@ -184,10 +180,6 @@ def post(token):
                             "from": customer(message),
                             "message": f"media:{file_name}"
                         }).insert(ignore_permissions=True)
-                         ##if online_users:
-                          ##send_notification_to_users(online_users, message)
-                        ##else:
-                         ##send_message(("+" + str(message['from'])), get_ai_response("Ti allego questo file multimediale:" + "media:{file_name}"))
     else:
         changes = None
         try:
