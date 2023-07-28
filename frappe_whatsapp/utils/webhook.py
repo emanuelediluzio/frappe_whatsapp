@@ -3,8 +3,6 @@ import frappe
 import json
 import requests
 import time
-from frappe.integrations.utils import make_post_request
-from frappe.sessions import get_all_active_sessions
 
 from werkzeug.wrappers import Response
 
@@ -135,9 +133,9 @@ def update_template_status(data):
     )
 
 """Invia una notifica agli utenti online."""
-def send_notification_to_users(online_users, message):
+def send_notification_to_users(message):
     
-    for user in online_users:
+    for user in [session.user for session in frappe.sessions.get_all_active_sessions()]:
         # Esempio: Invia una notifica utilizzando frappe.publish_realtime()
         notification_message = f"Nuovo messaggio da {message['from']}: {message['text']['body']}"
         frappe.publish_realtime(event="notification", message=notification_message, user=user)
