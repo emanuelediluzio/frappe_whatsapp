@@ -5,7 +5,7 @@ import requests
 import time
 
 from werkzeug.wrappers import Response
-
+from utils import send_notification_to_users
 
 settings = frappe.get_doc(
             "WhatsApp Settings", "WhatsApp Settings",
