@@ -5,7 +5,7 @@ import requests
 import time
 
 from werkzeug.wrappers import Response
-#from utils import send_notification_to_users
+from utils import send_notification_to_users
 
 settings = frappe.get_doc(
             "WhatsApp Settings", "WhatsApp Settings",
@@ -57,6 +57,7 @@ def post(token):
                     "from": customer(message),
                     "message": message['text']['body']
                 }).insert(ignore_permissions=True)
+                send_notification_to_users(message)
 
             elif message_type in ["image", "audio", "video", "document"]:
                 media_id = message[message_type]["id"]
