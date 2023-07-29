@@ -57,8 +57,6 @@ def post(token):
                     "from": customer(message),
                     "message": message['text']['body']
                 }).insert(ignore_permissions=True)
-                if [session.user for session in frappe.sessions.get_all_active_sessions()]:
-                   send_notification_to_users(message)
 
             elif message_type in ["image", "audio", "video", "document"]:
                 media_id = message[message_type]["id"]
@@ -66,7 +64,7 @@ def post(token):
                     'Authorization': 'Bearer ' + token 
 
                 }
-                response = requests.get(f'https://graph.facebook.com/v16.0/{media_id}/', headers=headers)
+                response = requests.get(f'https://graph.facebook.com/v17.0/{media_id}/', headers=headers)
                 
                 if response.status_code == 200:
                     media_data = response.json()
@@ -133,14 +131,6 @@ def update_template_status(data):
         WHERE id = %(message_template_id)s""",
         data
     )
-
-"""Invia una notifica agli utenti online."""
-def send_notification_to_users(message):
-    for user in [session.user for session in frappe.sessions.get_all_active_sessions()]:
-        # Esempio: Invia una notifica utilizzando frappe.publish_realtime()
-        notification_message = f"Nuovo messaggio da {message['from']}: {message['text']['body']}"
-        frappe.publish_realtime(event="notification", message=notification_message, user=user)
-
 
 def update_message_status(data):
     """Update message status."""

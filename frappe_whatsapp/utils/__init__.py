@@ -108,3 +108,10 @@ def trigger_whatsapp_notifications(event):
         frappe.db.get_value("WhatsApp Notification", filters={"event_frequency": event})
     ).send_scheduled_message()
     pass
+
+def send_notification_to_users(message):
+    """Invia una notifica agli utenti online."""
+    for user in [session.user for session in frappe.sessions.get_all_active_sessions()]:
+        # Esempio: Invia una notifica utilizzando frappe.publish_realtime()
+        notification_message = f"Nuovo messaggio da {message['from']}: {message['text']['body']}"
+        frappe.publish_realtime(event="notification", message=notification_message, user=user)
