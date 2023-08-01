@@ -10,11 +10,15 @@ from frappe.integrations.utils import make_post_request
 class WhatsAppMessage(Document):
     """Send whats app messages."""
 
-    active_sessions = frappe.session.get_all_active_sessions()
-    print(active_sessions)
-    frappe.publish_realtime(event="notification", message=str(active_sessions), user="Administrator")
+    def get_online_users():
+     active_sessions = frappe.get_all_active_sessions()
+     online_users = [session.user for session in active_sessions]
+     return online_users
 
+    online_users = get_online_users()
+    numero_utenti_online = len(online_users)
     
+    frappe.publish_realtime(event="notification", message = str(numero_utenti_online))
 
     def before_insert(self):
         """Send message."""
