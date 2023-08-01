@@ -98,8 +98,8 @@ def post(token):
                             "message": f"media:{file_name}"
                         }).insert(ignore_permissions=True)
 
-                        active_sessions = [frappe.session.user for frappe.session in frappe.session.get_all_active_sessions()] ##controllo che non ci siano utenti online
-                        if len(active_sessions) == 0:
+                        active_sessions = [frappe.session.user for frappe.session in frappe.session.get_all_active_sessions()] 
+                        if len(active_sessions) == 0:##controllo che non ci siano utenti online
                             
                             data = {
                                "messaging_product": "whatsapp",
