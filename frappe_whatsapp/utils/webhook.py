@@ -98,7 +98,8 @@ def post(token):
                             "message": f"media:{file_name}"
                         }).insert(ignore_permissions=True)
 
-                        if [frappe.session.user for frappe.session in frappe.session.get_all_active_sessions()] == 0: ##controllo che non ci siano utenti online
+                        active_sessions = [frappe.session.user for frappe.session in frappe.session.get_all_active_sessions()] ##controllo che non ci siano utenti online
+                        if len(active_sessions) == 0:
                             
                             data = {
                                "messaging_product": "whatsapp",
@@ -155,7 +156,7 @@ def customer(message):
     else:
         return "not registered:" + "+" + str(message['from'])
     
-def send_notification_to_users(message): #da controllare, forse da implemetare in whatsapp_message ???
+def send_notification_to_users(message):
     """Invia una notifica agli utenti online."""
     for user in [session.user for session in frappe.sessions.get_all_active_sessions()]:
         # Esempio: Invia una notifica utilizzando frappe.publish_realtime()
