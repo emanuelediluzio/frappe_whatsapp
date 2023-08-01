@@ -11,7 +11,7 @@ class WhatsAppMessage(Document):
     """Send whats app messages."""
 
     def get_online_users():
-     active_sessions = frappe.get_all_active_sessions()
+     active_sessions = frappe.sessions.get_all()
      online_users = [session.user for session in active_sessions]
      return online_users
 
