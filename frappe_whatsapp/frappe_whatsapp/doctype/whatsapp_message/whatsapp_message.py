@@ -11,7 +11,7 @@ class WhatsAppMessage(Document):
     """Send whats app messages."""
 
     def get_online_users():
-     active_sessions = frappe.sessions.get_all()
+     active_sessions = frappe.db.sql("SELECT user FROM tabSessions WHERE sessiondata LIKE '%\"user\":\"%'}'", as_dict=True)
      online_users = [session.user for session in active_sessions]
      return online_users
 
