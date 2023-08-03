@@ -5,14 +5,23 @@ import frappe
 import time
 from frappe.model.document import Document
 from frappe.integrations.utils import make_post_request
+from datetime import datetime, timedelta
 
 
 class WhatsAppMessage(Document):
     """Send whats app messages."""
 
     def get_online_users():
-     active_sessions = frappe.db.get_all("Sessions", filters={"lastupdate": (">", frappe.utils.now_datetime() - frappe.utils.time_delta(hours=1))}, fields=["user"])
+    # Imposta l'intervallo di tempo per considerare le sessioni come attive (ad esempio 15 minuti)
+     intervallo_tempo = timedelta(minutes=15)
+    
+    # Calcola il timestamp per il momento attuale meno l'intervallo di tempo
+     timestamp_limite = datetime.now() - intervallo_tempo
+    
+    # Ottieni gli utenti delle sessioni attive
+     active_sessions = frappe.db.get_all("Sessions", filters={"lastupdate": (">", timestamp_limite)}, fields=["user"])
      online_users = [session.user for session in active_sessions]
+    
      return online_users
 
     online_users = get_online_users()
