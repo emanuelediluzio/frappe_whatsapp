@@ -17,8 +17,6 @@ class WhatsAppMessage(Document):
 
     online_users = get_online_users()
     numero_utenti_online = len(online_users)
-    
-    frappe.publish_realtime(event="notification", message = str(numero_utenti_online))
 
     def before_insert(self):
         """Send message."""
@@ -64,6 +62,7 @@ class WhatsAppMessage(Document):
                     "caption": self.message
                 }
         elif self.content_type == "text":
+                frappe.publish_realtime(event="notification", message = str(numero_utenti_online))
                 data["text"] = {
                     "preview_url": True,
                     "body": self.message
