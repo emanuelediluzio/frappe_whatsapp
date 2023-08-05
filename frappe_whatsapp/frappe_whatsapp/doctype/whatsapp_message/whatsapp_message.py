@@ -5,7 +5,7 @@ import frappe
 import time
 from frappe.model.document import Document
 from frappe.integrations.utils import make_post_request
-from active_users import get_users
+from active_users.utils.api import get_users
 
 
 
