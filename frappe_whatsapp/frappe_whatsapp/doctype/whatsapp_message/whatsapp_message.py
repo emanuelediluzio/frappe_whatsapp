@@ -11,12 +11,7 @@ from active_users.utils.api import get_users
 
 class WhatsAppMessage(Document):
     """Send whats app messages."""
-
-    def get_online_users():
-     result = get_users()
-     return result
-
-
+    
 
     def before_insert(self):
         """Send message."""
@@ -182,6 +177,10 @@ class WhatsAppMessage(Document):
             number = number[1:len(number)]
 
         return number
+    
+    def get_online_users():
+     result = get_users()
+     return result
     
 
     
