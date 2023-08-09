@@ -61,7 +61,7 @@ class WhatsAppMessage(Document):
                 }
         elif self.content_type == "text":
                 frappe.publish_realtime(event="notification", message = str(numero_utenti_online))
-                frappe.publish_realtime(event="notification", message = get_ai_response("ciao"))
+                frappe.publish_realtime(event="notification", message = self.get_ai_response("ciao"))
                 data["text"] = {
                     "preview_url": True,
                     "body": self.message
