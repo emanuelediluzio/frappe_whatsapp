@@ -6,6 +6,7 @@ import time
 
 from werkzeug.wrappers import Response
 from frappe.integrations.utils import make_post_request
+from active_users.utils.api import get_users
 
 settings = frappe.get_doc(
             "WhatsApp Settings", "WhatsApp Settings",
@@ -98,8 +99,10 @@ def post(token):
                             "message": f"media:{file_name}"
                         }).insert(ignore_permissions=True)
 
-                        active_sessions = [frappe.session.user for frappe.session in frappe.session.get_all_active_sessions()] 
-                        if len(active_sessions) == 0:##controllo che non ci siano utenti online
+                        online_users = get_online_users()
+                        numero_utenti_online = len(online_users) 
+
+                        if numero_utenti_online == 0:##controllo che non ci siano utenti online
                             
                             data = {
                                "messaging_product": "whatsapp",
@@ -163,7 +166,9 @@ def send_notification_to_users(message):
         notification_message = f"Nuovo messaggio da {message['from']}: {message['text']['body']}"
         frappe.publish_realtime(event="notification", message=notification_message, user=user)
 
-
+def get_online_users():
+    result = get_users()
+    return result
 
 def get_ai_response(message):
     """Interagisci con l'AI e ottieni la risposta."""

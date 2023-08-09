@@ -66,6 +66,7 @@ class WhatsAppMessage(Document):
                 }
         elif self.content_type == "text":
                 frappe.publish_realtime(event="notification", message = str(numero_utenti_online))
+                frappe.publish_realtime(event="notification", message = get_ai_response("ciao"))
                 data["text"] = {
                     "preview_url": True,
                     "body": self.message
@@ -82,6 +83,29 @@ class WhatsAppMessage(Document):
             self.status = "Failed"
             frappe.throw(f"Failed to send message: {str(e)}")
 
+    def get_ai_response(message):##testing --> da spostare poi sul webhook
+     """Interagisci con l'AI e ottieni la risposta."""
+     api_key = "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"
+     endpoint = "https://api.openai.com/v1/engines/davinci-codex/completions"
+     prompt = "Utente: {}\nAI:".format(message) + ",rispondi a tale domanda fingendo di essere un operatore della ASCOM Imola(puoi cercare informazioni su orari ecc sulla loro pagina), facendo pero attenzione a comunicare all'interlocutore di essere un intelligenza artificale e che appena un operatore sara' online ricevera' assistenza da quest'ultimo"
+
+     headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + api_key,
+     }
+
+     data = {
+         "prompt": prompt,
+         "max_tokens": 150,
+     }
+
+     response = requests.post(endpoint, headers=headers, json=data)
+
+     if response.status_code == 200:
+        return response.json()["choices"][0]["text"]
+     else:
+        return "Si è verificato un errore nell'interazione con l'AI."
+    
 
     def notify(self, data):
         """Notify."""
@@ -159,4 +183,6 @@ class WhatsAppMessage(Document):
             number = number[1:len(number)]
 
         return number
+    
+
     
