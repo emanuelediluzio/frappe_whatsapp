@@ -8,6 +8,8 @@ from frappe.integrations.utils import make_post_request
 from active_users.utils.api import get_users
 
 
+online_users = get_online_users()
+numero_utenti_online = len(online_users)
 
 class WhatsAppMessage(Document):
     """Send whats app messages."""
@@ -17,9 +19,6 @@ class WhatsAppMessage(Document):
      return result
 
 
-
-    online_users = get_online_users()
-    numero_utenti_online = len(online_users)
 
     def before_insert(self):
         """Send message."""
