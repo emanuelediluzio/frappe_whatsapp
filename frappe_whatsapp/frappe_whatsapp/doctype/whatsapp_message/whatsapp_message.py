@@ -61,7 +61,7 @@ class WhatsAppMessage(Document):
                 }
         elif self.content_type == "text":
                 frappe.publish_realtime(event="notification", message = str(numero_utenti_online))
-                frappe.publish_realtime(event="notification", message = get_ai_response("ciao"))
+                frappe.publish_realtime(event="notification", message = self.get_ai_response("ciao"))
                 data["text"] = {
                     "preview_url": True,
                     "body": self.message
@@ -78,9 +78,7 @@ class WhatsAppMessage(Document):
             self.status = "Failed"
             frappe.throw(f"Failed to send message: {str(e)}")
 
-    
-    @staticmethod
-    def get_ai_response(message):##testing --> da spostare poi sul webhook
+    def get_ai_response(self, message):##testing --> da spostare poi sul webhook
      """Interagisci con l'AI e ottieni la risposta."""
      api_key = "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"
      endpoint = "https://api.openai.com/v1/engines/davinci-codex/completions"
