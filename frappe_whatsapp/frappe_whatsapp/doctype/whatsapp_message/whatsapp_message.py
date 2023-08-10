@@ -152,27 +152,28 @@ class WhatsAppMessage(Document):
             number = number[1:len(number)]
 
         return number
+     
+    def get_ai_response(self, message):
+     api_key = "YOUR_OPENAI_API_KEY"
+     endpoint = "https://api.openai.com/v1/chat/completions"
     
-    def get_ai_response(self, message):##testing --> da spostare poi sul webhook
-     """Interagisci con l'AI e ottieni la risposta."""
-     api_key = "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"
-     endpoint = "https://api.openai.com/v1/engines/davinci-codex/completions"
-     prompt = "Utente: {}\nAI:".format(message) + ",rispondi a tale domanda fingendo di essere un operatore della ASCOM Imola(puoi cercare informazioni su orari ecc sulla loro pagina), facendo pero attenzione a comunicare all'interlocutore di essere un intelligenza artificale e che appena un operatore sara' online ricevera' assistenza da quest'ultimo"
-
      headers = {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + api_key,
+         "Content-Type": "application/json",
+         "Authorization": "Bearer " + api_key,
      }
 
      data = {
-         "prompt": prompt,
-         "max_tokens": 150,
+         "messages": [
+             {"role": "system", "content": "You are a helpful assistant."},
+             {"role": "user", "content": message}
+         ]
      }
 
      response = requests.post(endpoint, headers=headers, json=data)
 
      if response.status_code == 200:
-        return response.json()["choices"][0]["text"]
+         choices = response.json()["choices"]
+         return choices[0]["message"]["content"]
      else:
        error_message = "Si è verificato un errore nell'interazione con l'AI."
        if response.text:
@@ -184,3 +185,6 @@ class WhatsAppMessage(Document):
             pass
        return error_message
     
+
+
+
