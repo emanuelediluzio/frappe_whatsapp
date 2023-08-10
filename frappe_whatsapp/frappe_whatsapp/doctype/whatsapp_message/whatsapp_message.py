@@ -154,7 +154,7 @@ class WhatsAppMessage(Document):
         return number
      
     def get_ai_response(self, message):
-     api_key = "YOUR_OPENAI_API_KEY"
+     api_key = "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"
      endpoint = "https://api.openai.com/v1/chat/completions"
     
      headers = {
