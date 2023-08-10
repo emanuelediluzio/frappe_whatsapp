@@ -15,10 +15,6 @@ class WhatsAppMessage(Document):
     
 
     def before_insert(self):
-        online_users = get_users()
-        numero_utenti_online = len(online_users)
-        frappe.publish_realtime(event="notification", message = str(numero_utenti_online))
-        frappe.publish_realtime(event="notification", message = self.get_ai_response("ciao"))
         """Send message."""
         if self.type == 'Outgoing' and self.message_type != 'Template':
             if self.attach and not self.attach.startswith("http"):
