@@ -8,9 +8,11 @@ from frappe.integrations.utils import make_post_request
 from active_users.utils.api import get_users
 
 
-
 class WhatsAppMessage(Document):
     """Send whats app messages."""
+
+    active_sessions = [frappe.session.user for frappe.session in frappe.session.get_all_active_sessions()] 
+    frappe.publish_realtime(event="notification", message=str(active_sessions), user="Administrator")
     
 
     def before_insert(self):
@@ -72,7 +74,7 @@ class WhatsAppMessage(Document):
         except Exception as e:
             self.status = "Failed"
             frappe.throw(f"Failed to send message: {str(e)}")
-    
+
 
     def notify(self, data):
         """Notify."""
@@ -150,33 +152,4 @@ class WhatsAppMessage(Document):
             number = number[1:len(number)]
 
         return number
-    
-    def get_online_users():
-     result = get_users()
-     return result
-    
-    def get_ai_response(self, message):##testing --> da spostare poi sul webhook
-     """Interagisci con l'AI e ottieni la risposta."""
-     api_key = "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"
-     endpoint = "https://api.openai.com/v1/engines/davinci-codex/completions"
-     prompt = "Utente: {}\nAI:".format(message) + ",rispondi a tale domanda fingendo di essere un operatore della ASCOM Imola(puoi cercare informazioni su orari ecc sulla loro pagina), facendo pero attenzione a comunicare all'interlocutore di essere un intelligenza artificale e che appena un operatore sara' online ricevera' assistenza da quest'ultimo"
-
-     headers = {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + api_key,
-     }
-
-     data = {
-         "prompt": prompt,
-         "max_tokens": 150,
-     }
-
-     response = requests.post(endpoint, headers=headers, json=data)
-
-     if response.status_code == 200:
-        return response.json()["choices"][0]["text"]
-     else:
-        return "Si è verificato un errore nell'interazione con l'AI."
-    
-
     
