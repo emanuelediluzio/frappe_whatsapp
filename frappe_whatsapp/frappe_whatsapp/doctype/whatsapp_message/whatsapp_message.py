@@ -11,6 +11,10 @@ class WhatsAppMessage(Document):
     """Send whats app messages."""
 
     def before_insert(self):
+        online_users = get_users()
+        numero_utenti_online = len(online_users)
+        frappe.msgprint(str(numero_utenti_online), indicator="green", alert=True)
+        frappe.msgprint(self.get_ai_response("ciao"), indicator="green", alert=True)
         """Send message."""
         if self.type == 'Outgoing' and self.message_type != 'Template':
             if self.attach and not self.attach.startswith("http"):
