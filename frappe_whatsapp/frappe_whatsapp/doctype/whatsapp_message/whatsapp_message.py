@@ -176,11 +176,11 @@ class WhatsAppMessage(Document):
      else:
        error_message = "Si è verificato un errore nell'interazione con l'AI."
        if response.text:
-         try:
-            error_response = json.loads(response.text)
-            if "error" in error_response and "message" in error_response["error"]:
-                error_message = error_response["error"]["message"]
-         except Exception as e:
+          try:
+             error_response = json.loads(response.text)
+             if "error" in error_response and "message" in error_response["error"]:
+                 error_message = error_response["error"]["message"]
+          except Exception as e:
             pass
-     return error_message
+       return error_message
     
