@@ -10,11 +10,7 @@ from active_users.utils.api import get_users
 
 class WhatsAppMessage(Document):
     """Send whats app messages."""
-
-    active_sessions = [frappe.session.user for frappe.session in frappe.session.get_all_active_sessions()] 
-    frappe.publish_realtime(event="notification", message=str(active_sessions), user="Administrator")
     
-
     def before_insert(self):
         """Send message."""
         if self.type == 'Outgoing' and self.message_type != 'Template':
