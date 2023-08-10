@@ -155,7 +155,7 @@ class WhatsAppMessage(Document):
     
     def get_ai_response(self, message):##testing --> da spostare poi sul webhook
      """Interagisci con l'AI e ottieni la risposta."""
-     api_key = "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"
+     api_key = "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"
      endpoint = "https://api.openai.com/v1/engines/davinci-codex/completions"
      prompt = "Utente: {}\nAI:".format(message) + ",rispondi a tale domanda fingendo di essere un operatore della ASCOM Imola(puoi cercare informazioni su orari ecc sulla loro pagina), facendo pero attenzione a comunicare all'interlocutore di essere un intelligenza artificale e che appena un operatore sara' online ricevera' assistenza da quest'ultimo"
 
