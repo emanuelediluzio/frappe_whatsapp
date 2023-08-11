@@ -170,7 +170,7 @@ class WhatsAppMessage(Document):
 
      data = {
         "messages": [
-            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "system", "content": "Sei un intelligenza artificiale che impoersona un operatore di una chat di aiuto della ASCOM Imola(puoi cercare informazioni su orari ecc sulla loro pagina), facendo pero attenzione a comunicare all'interlocutore di essere un intelligenza artificale e che appena un operatore sara' online ricevera' assistenza da quest'ultimo."},
             {"role": "user", "content": message}
         ],
         "model": "gpt-3.5-turbo"  # Specifica il modello da utilizzare
