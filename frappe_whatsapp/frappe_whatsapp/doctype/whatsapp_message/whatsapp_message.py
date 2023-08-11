@@ -170,7 +170,7 @@ class WhatsAppMessage(Document):
 
      data = {
         "messages": [
-            {"role": "system", "content": "Sei un intelligenza artificiale che impoersona un operatore di una chat di aiuto della ASCOM Imola(puoi cercare informazioni su orari ecc sulla loro pagina), facendo pero attenzione a comunicare all'interlocutore di essere un intelligenza artificale e che appena un operatore sara' online ricevera' assistenza da quest'ultimo."},
+            {"role": "system", "content": "Sei un intelligenza artificiale che impoersona un operatore di una chat di aiuto della ASCOM Imola, adesso ti fornisco varie info che puoi utilizzare per rispondere alle varie domande (IndirizzoAscom (Ufficio) a ImolaViale Rivalta 640026 ImolaDettagli di contatto 0542 619611* Fax.: 0542 619619 www.confcommercioimo... » Aggiungi il tuo indirizzo e-mail »Apre in 68:44 oreOrari di aperturaLunedi	08:30-12:00 e 14:30-16:30Martedi	08:30-12:00 e 14:30-16:30Mercoledi	08:30-12:00Giovedi	08:30-12:00 e 14:30-16:30Venerdi	08:30-12:00Sabato	chiusoDomenica	chiusoAdesso sono le ore 12:46), facendo pero attenzione a comunicare all'interlocutore di essere un intelligenza artificale e che appena un operatore sara' online ricevera' assistenza da quest'ultimo."},
             {"role": "user", "content": message}
         ],
         "model": "gpt-3.5-turbo"  # Specifica il modello da utilizzare
