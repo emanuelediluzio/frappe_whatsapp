@@ -21,12 +21,6 @@
    "length": 250
   },
   {
-    "fieldname": "token_open_ai",
-    "fieldtype": "Password",
-    "label": "Token AI",
-    "length": 250
-   },
-  {
    "fieldname": "url",
    "fieldtype": "Data",
    "label": "URL"
