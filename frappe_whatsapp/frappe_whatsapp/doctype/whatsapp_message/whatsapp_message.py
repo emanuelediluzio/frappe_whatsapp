@@ -169,11 +169,13 @@ class WhatsAppMessage(Document):
      }
 
      data = {
-         "messages": [
-             {"role": "system", "content": "You are a helpful assistant."},
-             {"role": "user", "content": message}
-         ]
-     }
+        "messages": [
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": message}
+        ],
+        "model": "gpt-3.5-turbo"  # Specifica il modello da utilizzare
+    }
+
 
      response = requests.post(endpoint, headers=headers, json=data)
 
