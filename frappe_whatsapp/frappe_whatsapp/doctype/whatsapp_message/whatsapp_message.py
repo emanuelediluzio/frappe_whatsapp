@@ -8,6 +8,12 @@ from frappe.model.document import Document
 from frappe.integrations.utils import make_post_request
 from active_users.utils.api import get_users
 
+"""Ricavo Token API OpenAi."""
+settings = frappe.get_doc(
+            "WhatsApp Settings", "WhatsApp Settings",
+        )
+token = settings.get_password("token_open_ai")
+
 class WhatsAppMessage(Document):
     """Send whats app messages."""
 
@@ -154,7 +160,7 @@ class WhatsAppMessage(Document):
         return number
      
     def get_ai_response(self, message):
-     api_key = "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"
+     api_key = self.token
      endpoint = "https://api.openai.com/v1/chat/completions"
     
      headers = {
