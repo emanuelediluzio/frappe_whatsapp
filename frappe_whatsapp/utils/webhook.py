@@ -13,6 +13,12 @@ settings = frappe.get_doc(
         )
 token = settings.get_password("token")
 
+"""Ricavo Token API OpenAi."""
+token_api = settings.get_password("token_open_ai")
+
+online_users = get_users()
+numero_utenti_online = len(online_users)
+
 @frappe.whitelist(allow_guest=True)
 def webhook():
     """Meta webhook."""
@@ -74,12 +80,9 @@ def post(token):
                     file_extension = mime_type.split('/')[1]
 
 
-
                     media_response = requests.get(media_url, headers=headers)
                     if media_response.status_code == 200:
                         file_data = media_response.content
-
-
 
                         file_path = "/opt/bench/frappe-bench/sites/ced.confcommercioimola.cloud/public/files/"
                        
@@ -91,7 +94,6 @@ def post(token):
                        
                         time.sleep(1) 
 
-                        
                         frappe.get_doc({
                             "doctype": "WhatsApp Message",
                             "type": "Incoming",
@@ -99,23 +101,15 @@ def post(token):
                             "message": f"media:{file_name}"
                         }).insert(ignore_permissions=True)
 
-                        online_users = get_online_users()
-                        numero_utenti_online = len(online_users) 
-
-                        if numero_utenti_online == 0:##controllo che non ci siano utenti online
+                        if numero_utenti_online == 0: ##controllo che non ci siano utenti online
                             
                             data = {
                                "messaging_product": "whatsapp",
                                "to": ("+" + str(message['from'])),
                                "type": "text",
                                "preview_url": True,
-                               "body": get_ai_response(message)
-                            } 
-
-                            settings = frappe.get_doc(
-                             "WhatsApp Settings", "WhatsApp Settings",
-                            )
-                            token = settings.get_password("token")
+                               "body": get_ai_response(message['text']['body']) ##ottengo la risposta dal messaggio in entrata dall'intelligenza artificiale
+                            }
 
                             headers = {
                                "authorization": f"Bearer {token}",
@@ -136,7 +130,6 @@ def post(token):
                              
                             except Exception as e:
                                res = frappe.flags.integration_request.json()['error']
-                               error_message = res.get('Error', res.get("message"))
                                frappe.get_doc({
                                  "doctype": "WhatsApp Notification Log",
                                  "template": "Text Message",
@@ -166,32 +159,39 @@ def send_notification_to_users(message):
         notification_message = f"Nuovo messaggio da {message['from']}: {message['text']['body']}"
         frappe.publish_realtime(event="notification", message=notification_message, user=user)
 
-def get_online_users():
-    result = get_users()
-    return result
-
 def get_ai_response(message):
-    """Interagisci con l'AI e ottieni la risposta."""
-    api_key = "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"
-    endpoint = "https://api.openai.com/v1/engines/davinci-codex/completions"
-    prompt = "Utente: {}\nAI:".format(message) + ",rispondi a tale domanda fingendo di essere un operatore della ASCOM Imola(puoi cercare informazioni su orari ecc sulla loro pagina), facendo pero attenzione a comunicare all'interlocutore di essere un intelligenza artificale e che appena un operatore sara' online ricevera' assistenza da quest'ultimo"
+     api_key = token_api
+     endpoint = "https://api.openai.com/v1/chat/completions"
+    
+     headers = {
+         "Content-Type": "application/json",
+         "Authorization": "Bearer " + api_key,
+     }
 
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + api_key,
+     data = {
+        "messages": [
+            {"role": "system", "content": "Sei un intelligenza artificiale che impoersona un operatore di una chat di aiuto della ASCOM Imola, adesso ti fornisco varie info che puoi utilizzare per rispondere alle varie domande (IndirizzoAscom (Ufficio) a ImolaViale Rivalta 640026 ImolaDettagli di contatto 0542 619611* Fax.: 0542 619619 www.confcommercioimo... » Aggiungi il tuo indirizzo e-mail »Apre in 68:44 oreOrari di aperturaLunedi	08:30-12:00 e 14:30-16:30Martedi	08:30-12:00 e 14:30-16:30Mercoledi	08:30-12:00Giovedi	08:30-12:00 e 14:30-16:30Venerdi	08:30-12:00Sabato	chiusoDomenica	chiusoAdesso sono le ore 12:46), facendo pero attenzione a comunicare all'interlocutore di essere un intelligenza artificale e che appena un operatore sara' online ricevera' assistenza da quest'ultimo."},
+            {"role": "user", "content": message}
+        ],
+        "model": "gpt-3.5-turbo"  # Specifica il modello da utilizzare
     }
 
-    data = {
-        "prompt": prompt,
-        "max_tokens": 150,
-    }
 
-    response = requests.post(endpoint, headers=headers, json=data)
+     response = requests.post(endpoint, headers=headers, json=data)
 
-    if response.status_code == 200:
-        return response.json()["choices"][0]["text"]
-    else:
-        return "Si è verificato un errore nell'interazione con l'AI."
+     if response.status_code == 200:
+         choices = response.json()["choices"]
+         return choices[0]["message"]["content"]
+     else:
+       error_message = "Si è verificato un errore nell'interazione con l'AI."
+       if response.text:
+          try:
+             error_response = json.loads(response.text)
+             if "error" in error_response and "message" in error_response["error"]:
+                 error_message = error_response["error"]["message"]
+          except Exception as e:
+            pass
+       return error_message
     
 
 def update_status(data):
