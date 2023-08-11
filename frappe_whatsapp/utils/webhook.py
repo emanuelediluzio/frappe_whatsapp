@@ -64,43 +64,33 @@ def post(token):
                     "from": customer(message),
                     "message": message['text']['body']
                 }).insert(ignore_permissions=True)
-
             elif message_type in ["image", "audio", "video", "document"]:
                 media_id = message[message_type]["id"]
                 headers = {
                     'Authorization': 'Bearer ' + token 
-
                 }
-                response = requests.get(f'https://graph.facebook.com/v17.0/{media_id}/', headers=headers)
-                
+                response = requests.get(f'https://graph.facebook.com/v16.0/{media_id}/', headers=headers)
                 if response.status_code == 200:
                     media_data = response.json()
                     media_url = media_data.get("url")
                     mime_type = media_data.get("mime_type")
                     file_extension = mime_type.split('/')[1]
-
-
                     media_response = requests.get(media_url, headers=headers)
                     if media_response.status_code == 200:
                         file_data = media_response.content
-
                         file_path = "/opt/bench/frappe-bench/sites/ced.confcommercioimola.cloud/public/files/"
-                       
                         file_name = f"{frappe.generate_hash(length=10)}.{file_extension}"
                         file_full_path = file_path + file_name
 
                         with open(file_full_path, "wb") as file:
                             file.write(file_data)
-                       
                         time.sleep(1) 
-
                         frappe.get_doc({
                             "doctype": "WhatsApp Message",
                             "type": "Incoming",
                             "from": customer(message),
                             "message": f"media:{file_name}"
                         }).insert(ignore_permissions=True)
-
                         if numero_utenti_online == 0: ##controllo che non ci siano utenti online
                             
                             data = {
@@ -135,7 +125,6 @@ def post(token):
                                  "template": "Text Message",
                                  "meta_data": frappe.flags.integration_request.json()
                                }).insert(ignore_permissions=True)
-
     else:
         changes = None
         try:
@@ -145,6 +134,7 @@ def post(token):
         update_status(changes)
     return
 
+
 def customer(message):
     if (frappe.db.get_value("Customer", filters={"mobile_no": ("+" + str(message['from']))}, fieldname="customer_name")):
         return frappe.db.get_value("Customer", filters={"mobile_no": ("+" + str(message['from']))}, fieldname="customer_name")
@@ -152,12 +142,38 @@ def customer(message):
     else:
         return "not registered:" + "+" + str(message['from'])
     
-def send_notification_to_users(message):
-    """Invia una notifica agli utenti online."""
-    for user in [session.user for session in frappe.sessions.get_all_active_sessions()]:
-        # Esempio: Invia una notifica utilizzando frappe.publish_realtime()
-        notification_message = f"Nuovo messaggio da {message['from']}: {message['text']['body']}"
-        frappe.publish_realtime(event="notification", message=notification_message, user=user)
+
+def update_status(data):
+    """Update status hook."""
+    if data.get("field") == "message_template_status_update":
+        update_template_status(data['value'])
+
+    elif data.get("field") == "messages":
+        update_message_status(data['value'])
+
+
+def update_template_status(data):
+    """Update template status."""
+    frappe.db.sql(
+        """UPDATE `tabWhatsApp Templates`
+        SET status = %(event)s
+        WHERE id = %(message_template_id)s""",
+        data
+    )
+
+
+def update_message_status(data):
+    """Update message status."""
+    id = data['statuses'][0]['id']
+    status = data['statuses'][0]['status']
+    conversation = data['statuses'][0].get('conversation', {}).get('id')
+    name = frappe.db.get_value("WhatsApp Message", filters={"message_id": id})
+    doc = frappe.get_doc("WhatsApp Message", name)
+
+    doc.status = status
+    if conversation:
+        doc.conversation_id = conversation
+    doc.save(ignore_permissions=True)
 
 def get_ai_response(message):
      api_key = token_api
@@ -191,38 +207,4 @@ def get_ai_response(message):
                  error_message = error_response["error"]["message"]
           except Exception as e:
             pass
-       return error_message
-    
-
-def update_status(data):
-    """Update status hook."""
-    if data.get("field") == "message_template_status_update":
-        update_template_status(data['value'])
-
-    elif data.get("field") == "messages":
-        update_message_status(data['value'])
-
-    
-def update_template_status(data):
-    """Update template status."""
-    frappe.db.sql(
-        """UPDATE `tabWhatsApp Templates`
-        SET status = %(event)s
-        WHERE id = %(message_template_id)s""",
-        data
-    )
-
-def update_message_status(data):
-    """Update message status."""
-    id = data['statuses'][0]['id']
-    status = data['statuses'][0]['status']
-    conversation = data['statuses'][0].get('conversation', {}).get('id')
-    name = frappe.db.get_value("WhatsApp Message", filters={"message_id": id})
-    doc = frappe.get_doc("WhatsApp Message", name)
-
-    doc.status = status
-    if conversation:
-        doc.conversation_id = conversation
-    doc.save(ignore_permissions=True)
-
-import requests
+     return error_message

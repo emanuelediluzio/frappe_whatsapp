@@ -6,7 +6,6 @@ import time
 import requests
 from frappe.model.document import Document
 from frappe.integrations.utils import make_post_request
-from active_users.utils.api import get_users
 
 
 class WhatsAppMessage(Document):
@@ -18,10 +17,6 @@ class WhatsAppMessage(Document):
     token = settings.get_password("token_open_ai")
 
     def before_insert(self):
-        online_users = get_users()
-        numero_utenti_online = len(online_users)
-        frappe.msgprint(str(numero_utenti_online), indicator="green", alert=True)
-        frappe.msgprint(self.get_ai_response(self.message), indicator="green", alert=True)
         """Send message."""
         if self.type == 'Outgoing' and self.message_type != 'Template':
             if self.attach and not self.attach.startswith("http"):
@@ -159,39 +154,6 @@ class WhatsAppMessage(Document):
 
         return number
      
-    def get_ai_response(self, message):
-     api_key = self.token
-     endpoint = "https://api.openai.com/v1/chat/completions"
-    
-     headers = {
-         "Content-Type": "application/json",
-         "Authorization": "Bearer " + api_key,
-     }
-
-     data = {
-        "messages": [
-            {"role": "system", "content": "Sei un intelligenza artificiale che impoersona un operatore di una chat di aiuto della ASCOM Imola, adesso ti fornisco varie info che puoi utilizzare per rispondere alle varie domande (IndirizzoAscom (Ufficio) a ImolaViale Rivalta 640026 ImolaDettagli di contatto 0542 619611* Fax.: 0542 619619 www.confcommercioimo... » Aggiungi il tuo indirizzo e-mail »Apre in 68:44 oreOrari di aperturaLunedi	08:30-12:00 e 14:30-16:30Martedi	08:30-12:00 e 14:30-16:30Mercoledi	08:30-12:00Giovedi	08:30-12:00 e 14:30-16:30Venerdi	08:30-12:00Sabato	chiusoDomenica	chiusoAdesso sono le ore 12:46), facendo pero attenzione a comunicare all'interlocutore di essere un intelligenza artificale e che appena un operatore sara' online ricevera' assistenza da quest'ultimo."},
-            {"role": "user", "content": message}
-        ],
-        "model": "gpt-3.5-turbo"  # Specifica il modello da utilizzare
-    }
-
-
-     response = requests.post(endpoint, headers=headers, json=data)
-
-     if response.status_code == 200:
-         choices = response.json()["choices"]
-         return choices[0]["message"]["content"]
-     else:
-       error_message = "Si è verificato un errore nell'interazione con l'AI."
-       if response.text:
-          try:
-             error_response = json.loads(response.text)
-             if "error" in error_response and "message" in error_response["error"]:
-                 error_message = error_response["error"]["message"]
-          except Exception as e:
-            pass
-       return error_message
     
 
 
