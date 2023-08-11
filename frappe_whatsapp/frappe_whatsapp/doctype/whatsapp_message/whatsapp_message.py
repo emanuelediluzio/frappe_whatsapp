@@ -8,14 +8,14 @@ from frappe.model.document import Document
 from frappe.integrations.utils import make_post_request
 from active_users.utils.api import get_users
 
-"""Ricavo Token API OpenAi."""
-settings = frappe.get_doc(
-            "WhatsApp Settings", "WhatsApp Settings",
-        )
-token = settings.get_password("token_open_ai")
 
 class WhatsAppMessage(Document):
     """Send whats app messages."""
+    """Ricavo Token API OpenAi."""
+    settings = frappe.get_doc(
+            "WhatsApp Settings", "WhatsApp Settings",
+         )
+    token = settings.get_password("token_open_ai")
 
     def before_insert(self):
         online_users = get_users()
