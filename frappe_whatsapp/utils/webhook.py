@@ -58,6 +58,7 @@ def post(token):
     if messages:
         for message in messages:
             message_type = message['type']
+        if numero_utenti_online >= 1:
             if message_type == 'text':
                 frappe.get_doc({
 
@@ -94,7 +95,7 @@ def post(token):
                             "message": f"media:{file_name}"
                         }).insert(ignore_permissions=True)
 
-                        if numero_utenti_online == 0: ##controllo che non ci siano utenti online
+        elif numero_utenti_online == 0: ##controllo che non ci siano utenti online
                             
                             data = {
                                "messaging_product": "whatsapp",
