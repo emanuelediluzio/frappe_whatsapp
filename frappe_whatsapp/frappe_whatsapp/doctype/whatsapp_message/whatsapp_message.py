@@ -3,9 +3,9 @@
 import json
 import frappe
 import time
-import requests
 from frappe.model.document import Document
 from frappe.integrations.utils import make_post_request
+from active_users.utils.api import get_users
 
 
 class WhatsAppMessage(Document):
@@ -17,8 +17,13 @@ class WhatsAppMessage(Document):
                 link = frappe.utils.get_url() + '/' + self.attach
             else:
                 link = self.attach
-         
 
+        online_users = get_users()
+        numero_utenti_online = len(online_users)
+         
+        if numero_utenti_online == 0: ##controllo che non ci siano utenti onlineif numero_utenti_online == 0: ##controllo che non ci siano utenti online
+             self.notifyAll(mobile_no)
+       
         if self.switch:
                 customers = frappe.db.get_list("Customer", filters={"customer_group": self.gruppo}, pluck="customer_name")
                 for customer in customers:
