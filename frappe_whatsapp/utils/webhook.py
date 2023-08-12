@@ -69,7 +69,7 @@ def post(token):
                 headers = {
                     'Authorization': 'Bearer ' + token 
                 }
-                response = requests.get(f'https://graph.facebook.com/v17.0/{media_id}/', headers=headers)
+                response = requests.get(f'https://graph.facebook.com/v16.0/{media_id}/', headers=headers)
                 if response.status_code == 200:
                     media_data = response.json()
                     media_url = media_data.get("url")
@@ -110,6 +110,13 @@ def post(token):
                                 f"{settings.url}/{settings.version}/{settings.phone_id}/messages",
                                 headers=headers, data=json.dumps(data)
                               )
+                              frappe.get_doc({##vado poi a creare il doctype con il messaggio in uscita
+                               "doctype": "WhatsApp Message",
+                               "type": "Outgoing",
+                               "to": ("+" + str(message['from'])),
+                               "message": get_ai_response(message),
+                               "message_id": response['messages'][0]['id']
+                              }).insert(ignore_permissions=True)
                             
                             except Exception as e:
                                res = frappe.flags.integration_request.json()['error']
