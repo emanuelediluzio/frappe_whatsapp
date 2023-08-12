@@ -3,6 +3,7 @@
 import json
 import frappe
 import time
+import requests
 from frappe.model.document import Document
 from frappe.integrations.utils import make_post_request
 from active_users.utils.api import get_users
@@ -19,9 +20,6 @@ class WhatsAppMessage(Document):
     """Ricavo Token API OpenAi."""
     token_api = settings.get_password("token_open_ai")
 
-    online_users = get_users()
-    numero_utenti_online = len(online_users)
-
     def before_insert(self):
         """Send message."""
         if self.type == 'Outgoing' and self.message_type != 'Template':
@@ -29,6 +27,44 @@ class WhatsAppMessage(Document):
                 link = frappe.utils.get_url() + '/' + self.attach
             else:
                 link = self.attach
+
+
+        online_users = get_users()
+        numero_utenti_online = len(online_users)
+        if numero_utenti_online == 0 and self.type == 'Incoming': ##controllo che non ci siano utenti online e che il messaggio sia in ingresso
+                            
+                            data = {
+                               "messaging_product": "whatsapp",
+                               "to": self.format_number(mobile_no),
+                               "type": "text",
+                               "preview_url": True,
+                               "body": self.get_ai_response(message['text']['body']) ##ottengo la risposta dal messaggio in entrata dall'intelligenza artificiale
+                            }
+
+                            headers = {
+                               "authorization": f"Bearer {token}",
+                               "content-type": "application/json"
+                            }
+                            try:
+                              response = make_post_request(
+                                f"{settings.url}/{settings.version}/{settings.phone_id}/messages",
+                                headers=headers, data=json.dumps(data)
+                              )
+                              frappe.get_doc({##vado poi a creare il doctype con il messaggio in uscita
+                               "doctype": "WhatsApp Message",
+                               "type": "Outgoing",
+                               "to": ("+" + str(message['from'])),
+                               "message": get_ai_response(message),
+                               "message_id": response['messages'][0]['id']
+                              }).insert(ignore_permissions=True)
+                            
+                            except Exception as e:
+                               res = frappe.flags.integration_request.json()['error']
+                               frappe.get_doc({
+                                 "doctype": "WhatsApp Notification Log",
+                                 "template": "Text Message",
+                                 "meta_data": frappe.flags.integration_request.json()
+                               }).insert(ignore_permissions=True)        
          
             if self.switch:
                 customers = frappe.db.get_list("Customer", filters={"customer_group": self.gruppo}, pluck="customer_name")
@@ -160,8 +196,8 @@ class WhatsAppMessage(Document):
 
         return number
     
-    def get_ai_response(message):
-     api_key = token_api
+    def get_ai_response(self, message):
+     api_key = self.token_api
      endpoint = "https://api.openai.com/v1/chat/completions"
     
      headers = {
