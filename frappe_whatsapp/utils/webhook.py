@@ -60,6 +60,7 @@ def post(token):
             message_type = message['type']
             if message_type == 'text':
                 frappe.get_doc({
+
                     "doctype": "WhatsApp Message",
                     "type": "Incoming",
                     "from": customer(message),
