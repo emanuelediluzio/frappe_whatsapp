@@ -110,14 +110,7 @@ def post(token):
                                 f"{settings.url}/{settings.version}/{settings.phone_id}/messages",
                                 headers=headers, data=json.dumps(data)
                               )
-                              frappe.get_doc({##vado poi a creare il doctype con il messaggio in uscito
-                               "doctype": "WhatsApp Message",
-                               "type": "Outgoing",
-                               "to": ("+" + str(message['from'])),
-                               "message": get_ai_response(message),
-                               "message_id": response['messages'][0]['id']
-                              }).insert(ignore_permissions=True)
-                             
+                            
                             except Exception as e:
                                res = frappe.flags.integration_request.json()['error']
                                frappe.get_doc({
