@@ -69,7 +69,7 @@ def post(token):
                 headers = {
                     'Authorization': 'Bearer ' + token 
                 }
-                response = requests.get(f'https://graph.facebook.com/v16.0/{media_id}/', headers=headers)
+                response = requests.get(f'https://graph.facebook.com/v17.0/{media_id}/', headers=headers)
                 if response.status_code == 200:
                     media_data = response.json()
                     media_url = media_data.get("url")

@@ -31,42 +31,24 @@ class WhatsAppMessage(Document):
 
         online_users = get_users()
         numero_utenti_online = len(online_users)
-        if numero_utenti_online == 0 and self.type == 'Incoming': ##controllo che non ci siano utenti online e che il messaggio sia in ingresso
-                            
-                            data = {
-                               "messaging_product": "whatsapp",
-                               "to": self.format_number(mobile_no),
-                               "type": "text",
-                               "preview_url": True,
-                               "body": self.get_ai_response(message['text']['body']) ##ottengo la risposta dal messaggio in entrata dall'intelligenza artificiale
-                            }
+        if numero_utenti_online == 0 and self.type == 'Incoming': 
+            data = {
+                "messaging_product": "whatsapp",
+                "to": self.format_number(self.get_mobile_number(self.from)),
+                "type": "text",
+                "preview_url": True,
+                "body": self.get_ai_response(self.message) ##ottengo la risposta dal messaggio in entrata dall'intelligenza artificiale
+                    }
 
-                            headers = {
-                               "authorization": f"Bearer {token}",
-                               "content-type": "application/json"
-                            }
-                            try:
-                              response = make_post_request(
-                                f"{settings.url}/{settings.version}/{settings.phone_id}/messages",
-                                headers=headers, data=json.dumps(data)
-                              )
-                              frappe.get_doc({##vado poi a creare il doctype con il messaggio in uscita
-                               "doctype": "WhatsApp Message",
-                               "type": "Outgoing",
-                               "to": ("+" + str(message['from'])),
-                               "message": get_ai_response(message),
-                               "message_id": response['messages'][0]['id']
-                              }).insert(ignore_permissions=True)
-                            
-                            except Exception as e:
-                               res = frappe.flags.integration_request.json()['error']
-                               frappe.get_doc({
-                                 "doctype": "WhatsApp Notification Log",
-                                 "template": "Text Message",
-                                 "meta_data": frappe.flags.integration_request.json()
-                               }).insert(ignore_permissions=True)        
+            try:
+                self.notify(data)
+                self.status = "Success"
+            except Exception as e:
+                self.status = "Failed"
+            frappe.throw(f"Failed to send message: {str(e)}")
          
-            if self.switch:
+
+        if self.switch:
                 customers = frappe.db.get_list("Customer", filters={"customer_group": self.gruppo}, pluck="customer_name")
                 for customer in customers:
                     mobile_no = frappe.db.get_value("Customer", filters={"customer_name": customer}, fieldname="mobile_no")
@@ -74,7 +56,7 @@ class WhatsAppMessage(Document):
                         self.send_message(mobile_no, link)
                         time.sleep(2)
 
-            if self.notifica:
+        if self.notifica:
                 customers = frappe.db.get_list("Customer", pluck="customer_name")
                 for customer in customers:
                     mobile_no = frappe.db.get_value("Customer", filters={"customer_name": customer}, fieldname="mobile_no")
@@ -83,7 +65,7 @@ class WhatsAppMessage(Document):
                         time.sleep(2)          
                         
               
-            if not self.switch and not self.notifica:
+        if not self.switch and not self.notifica:
                 mobile_no = frappe.db.get_value("Customer", filters={"customer_name": self.a}, fieldname="mobile_no")
                 if mobile_no:
                     self.send_message(mobile_no, link)
@@ -229,3 +211,7 @@ class WhatsAppMessage(Document):
           except Exception as e:
             pass
      return error_message
+    
+    def get_mobile_number(self, customer_name):
+     mobile_no = frappe.db.get_value("Customer", filters={"customer_name": customer_name}, fieldname="mobile_no")
+     return mobile_no if mobile_no else "not registered"
