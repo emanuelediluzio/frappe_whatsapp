@@ -20,8 +20,13 @@ class WhatsAppMessage(Document):
 
         online_users = get_users()
         numero_utenti_online = len(online_users)
+
+        while True:
+         print("Numero di utenti online:", numero_utenti_online)
+         time.sleep(5)  # Attendi 5 secondi prima di ripetere il ciclo
          
         if numero_utenti_online == 0: ##controllo che non ci siano utenti onlineif numero_utenti_online == 0: ##controllo che non ci siano utenti online
+             print("Nessun utente online, eseguo l'interazione con l'AI...")
              self.notifyAll(mobile_no)
        
         if self.switch:
