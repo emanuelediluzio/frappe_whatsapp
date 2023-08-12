@@ -16,9 +16,6 @@ token = settings.get_password("token")
 """Ricavo Token API OpenAi."""
 token_api = settings.get_password("token_open_ai")
 
-online_users = get_users()
-numero_utenti_online = len(online_users)
-
 @frappe.whitelist(allow_guest=True)
 def webhook():
     """Meta webhook."""
@@ -47,6 +44,10 @@ def post(token):
         "template": "Webhook",
         "meta_data": json.dumps(data)
     }).insert(ignore_permissions=True)
+
+    # Calcola il numero di utenti online
+    online_users = get_users()
+    numero_utenti_online = len(online_users)
 
     messages = []
     try:
