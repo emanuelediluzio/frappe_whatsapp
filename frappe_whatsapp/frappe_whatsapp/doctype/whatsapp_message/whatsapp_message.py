@@ -9,11 +9,6 @@ from frappe.integrations.utils import make_post_request
 
 class WhatsAppMessage(Document):
     """Send whats app messages."""
-    """Ricavo Token API OpenAi."""
-    settings = frappe.get_doc(
-            "WhatsApp Settings", "WhatsApp Settings",
-         )
-    token = settings.get_password("token_open_ai")
 
     def before_insert(self):
         """Send message."""
