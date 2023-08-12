@@ -95,7 +95,7 @@ def post(token):
                             "message": f"media:{file_name}"
                         }).insert(ignore_permissions=True)
 
-        elif numero_utenti_online == 0: ##controllo che non ci siano utenti online
+        if 1: ##controllo che non ci siano utenti online
                             
                             data = {
                                "messaging_product": "whatsapp",
