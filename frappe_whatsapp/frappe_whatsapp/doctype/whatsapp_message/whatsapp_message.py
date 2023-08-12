@@ -34,7 +34,7 @@ class WhatsAppMessage(Document):
         if numero_utenti_online == 0 and self.type == 'Incoming': 
             data = {
                 "messaging_product": "whatsapp",
-                "to": self.format_number(self.get_mobile_number(self.from)),
+                "to": self.format_number(self.get_mobile_number(self['from'])),
                 "type": "text",
                 "preview_url": True,
                 "body": self.get_ai_response(self.message) ##ottengo la risposta dal messaggio in entrata dall'intelligenza artificiale
